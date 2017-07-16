@@ -3,32 +3,54 @@ require "addressable"
 require "date"
 
 class Client
-  def subdomain
-    ENV.fetch("ZENDESK_SUBDOMAIN")
+  attr_accessor :ticket_count
+  def paginate_through(filename)
+    page = 1
+    per_page = 25
+    start_time = Date.new(2017, 1, 1).to_time.to_i
+
+    next_page = ""
+    @ticket_count = 0
+    result = []
+
+    while !next_page.nil?
+      response = get(filename, { start_time: start_time, page: page, per_page: per_page })
+      result << response["tickets"]
+      next_page = response["next_page"]
+      @ticket_count = response["count"]
+      page += 1
+    end
+    result
   end
 
-  def email
-    ENV.fetch("ZENDESK_EMAIL")
+  def all_tickets
+    paginate_through("tickets.json").flatten
   end
 
-  def password
-    ENV.fetch("ZENDESK_PASSWORD")
-  end
+  private
+    def subdomain
+      ENV.fetch("ZENDESK_SUBDOMAIN")
+    end
 
-  def get(filename, params={})
-    HTTP.basic_auth(user: email, pass: password).get(zendesk_url(filename, params)).parse
-  end
+    def email
+      ENV.fetch("ZENDESK_EMAIL")
+    end
 
-  def zendesk_url(filename, params={})
-    Addressable::URI.new({
-      scheme:       "https",
-      host:         "#{subdomain}.zendesk.com",
-      path:         File.join("api", "v2", filename),
-      query_values: params
-    })
-  end
+    def password
+      ENV.fetch("ZENDESK_PASSWORD")
+    end
 
-  def all_data
-    get("tickets.json", start_time: Date.new(2017, 1, 1).to_time.to_i)
-  end
+    def zendesk_url(filename, params={})
+      Addressable::URI.new({
+        scheme:       "https",
+        host:         "#{subdomain}.zendesk.com",
+        path:         File.join("api", "v2", filename),
+        query_values: params
+      })
+    end
+
+    def get(filename, params={})
+      HTTP.basic_auth(user: email, pass: password).get(zendesk_url(filename, params)).parse
+    end
 end
+
