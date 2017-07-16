@@ -9,7 +9,7 @@ describe Client do
         ticket_count = client.ticket_count
 
         it "records an array of tickets" do
-          expect(tickets).to respond_to :length
+          expect(tickets).to be_an_instance_of Array
         end
 
         it "records with correct ticket keys" do
