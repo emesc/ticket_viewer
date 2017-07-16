@@ -1,17 +1,23 @@
 require 'client'
 
 describe Client do
-  context "connecting to Zendesk api" do
-    it "connects without an error" do
+  describe "with an explicit cassette name" do
+    context "an http request without errors" do
       VCR.use_cassette("ticket results") do
         client = Client.new
         result = client.all_data
-        expect(result.keys).to include("tickets")
-        expect(result.keys).to include("next_page")
-        expect(result.keys).to include("count")
-        expect(result["tickets"].first.keys).to include("id")
-        expect(result["tickets"].first.keys).to include("requester_id")
-        expect(result["tickets"].size).to be == result["count"]
+
+        it "records with the correct response keys" do
+          expect(result.keys).to match_array(["tickets", "next_page", "previous_page", "count"])
+        end
+
+        it "records with the correct ticket keys" do
+          expect(result["tickets"].first.keys).to include("id", "requester_id")
+        end
+
+        it "records with the correct ticket count" do
+          expect(result["tickets"].size).to be == result["count"]
+        end
       end
     end
   end
