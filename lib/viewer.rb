@@ -9,7 +9,16 @@ class Viewer
 
   def connect
     introduction
+    menu
     conclusion
+  end
+
+  def menu
+    puts "Select view options"
+    puts "*Type 'next'      to view the next page of tickets"
+    puts "*Type 'prev'      to view the previous page of tickets"
+    puts "*Type 'show <id>' to view a ticket"
+    puts "*Type 'quit'      to exit"
   end
 
   def introduction
