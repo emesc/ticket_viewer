@@ -6,12 +6,9 @@ end
 
 def capture_stdout(&block)
   old_stdout = $stdout.dup
-  fake = StringIO.new
-  $stdout = fake
-  begin
-    yield
+  $stdout = fake = StringIO.new
+  yield
+  fake.string
   ensure
     $stdout = old_stdout
-  end
-  fake.string
 end
