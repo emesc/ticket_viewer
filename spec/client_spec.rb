@@ -3,7 +3,7 @@ require 'client'
 describe Client do
   describe "with an explicit cassette name" do
     context "an http request without errors" do
-      VCR.use_cassette("ticket results") do
+      VCR.use_cassette("tickets") do
         client = Client.new
         tickets = client.all_tickets
         ticket_count = client.ticket_count

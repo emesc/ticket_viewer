@@ -20,10 +20,10 @@ describe Viewer do
     end
 
     context "with next command" do
-      VCR.use_cassette("ticket results") do
+      VCR.use_cassette("tickets") do
         vcr_viewer = Viewer.new
         output = capture_stdout { vcr_viewer.connect }
-        
+
         it "outputs the next list of tickets" do
           fake_user_input("next", "quit")
           tickets = output.split("\n")
