@@ -9,52 +9,56 @@ class Viewer
     @tickets = []
     @tickets_flat = []
     @page = 0
-    # launch
+    launch
   end
 
-  # def launch
-  #   introduction
-  #   result = ""
-  #   until result == :quit
-  #     command, args = get_command
-  #     result = do_command(command, args)
-  #   end
-  #   conclusion
-  # end
+  def launch
+    introduction
+    result = ""
+    until result == :quit
+      command, args = get_command
+      result = do_command(command, args)
+    end
+    conclusion
+  end
 
-  # def get_command
-  #   puts
-  #   print "> "
-  #   user_command = gets.chomp.downcase.strip
-  #   args = user_command.split(" ")
-  #   action = args.shift
-  #   return action, args
-  # end
+  def get_command
+    puts
+    print "> "
+    user_command = gets.chomp.downcase.strip
+    args = user_command.split(" ")
+    action = args.shift
+    return action, args
+  end
 
-  # def do_command(action, args=[])
-  #   case action
-  #   when 'menu'
-  #     menu
-  #   when 'load'
-  #     load
-  #   when 'next'
-  #     next_page
-  #   when 'prev'
-  #     prev_page
-  #   when 'show'
-  #     id = args.shift
-  #     show(id)
-  #   when 'quit'
-  #     :quit
-  #   end
-  # end
+  def do_command(action, args=[])
+    case action
+    when 'menu'
+      menu
+    when 'load'
+      load
+    when 'next'
+      next_page
+    when 'prev'
+      prev_page
+    when 'page'
+      num = args.shift
+      page(num)
+    when 'show'
+      id = args.shift
+      show(id)
+    when 'quit'
+      :quit
+    end
+  end
 
   def menu
     puts "View options"
     puts "*Type 'load'      to connect to the api and retrieve the tickets"
-    puts "*Type 'next'      to view the next page of tickets"
-    puts "*Type 'prev'      to view the previous page of tickets"
-    puts "*Type 'show <id>' to view a ticket"
+    puts "*Type 'next'      to view following page of tickets"
+    puts "*Type 'prev'      to view previous  page of tickets"
+    puts "*Type 'page <no>' to view specific  page of tickets"
+    puts "*Type 'show <id>' to view specific  ticket"
     puts "*Type 'quit'      to exit"
   end
 
@@ -100,6 +104,20 @@ class Viewer
       puts "Please type 'load' to retrieve the tickets"
     else
       @page -= 1
+      output_options
+      output_table_header
+      @tickets[current_page].each do |ticket|
+        list(ticket)
+      end
+      output_options
+    end
+  end
+
+  def page(num)
+    if @tickets.empty?
+      puts "Please type 'load' to retrieve the tickets"
+    else
+      @page = num.to_i - 1
       output_options
       output_table_header
       @tickets[current_page].each do |ticket|
@@ -163,7 +181,7 @@ class Viewer
   end
 end
 
-# Viewer.new
+Viewer.new
 # v.load
 # v.show(101)
 # v.show(75)
