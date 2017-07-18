@@ -103,11 +103,11 @@ describe Viewer do
           fake_user_input("show 1", "quit")
           output = capture_stdout { vcr_viewer.show(1)}
           rows = output.split("\n")
-          expect(rows[0]).to match(/Showing ticket ID 1:/)
-          expect(rows[1]).to eq("-" * 135)
-          expect(rows[2]).to match(/^\s{2}ID\s|\sStatus\s{4}|\sSubject\s{54}|\sRequester\s{6}|\sCreated\son\s{21}$/)
-          expect(rows[3]).to eq("-" * 135)
-          expect(rows[4]).to include("|     1 |")
+          expect(rows[1]).to match(/Showing ticket ID 1:/)
+          expect(rows[2]).to eq("-" * 135)
+          expect(rows[3]).to match(/^\s{2}ID\s|\sStatus\s{4}|\sSubject\s{54}|\sRequester\s{6}|\sCreated\son\s{21}$/)
+          expect(rows[4]).to eq("-" * 135)
+          expect(rows[5]).to include("|     1 |")
         end
       end
     end
