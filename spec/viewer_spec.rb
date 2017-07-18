@@ -49,7 +49,7 @@ describe Viewer do
           # expect(rows[4]).to match(/^\s{2}ID\s|\sSubject\s{54}|\sRequester\s{6}|\sCreated\son\s{21}$/)
           # expect(rows[5]).to eq("-" * 135)
           # expect(rows[6]).to include("|     1 |")
-          expect(rows.length).to be <= 58 # 2 rows for retrieving+ 6 rows for table headers + 25 tickets + 25 horizontal lines 
+          expect(rows.length).to be <= 57 # 6->table headers + 25->tickets + 25->dividers + 1->option
         end
       end
     end
@@ -63,13 +63,13 @@ describe Viewer do
           fake_user_input("next", "quit")
           output = capture_stdout { vcr_viewer.next_page }
           rows = output.split("\n")
-          expect(rows[1]).to match(/Showing page 2/)
-          expect(rows[2]).to match(/Type 'menu' to view options or 'quit' to exit/)
-          expect(rows[3]).to eq("-" * 135)
-          expect(rows[4]).to match(/^\s{2}ID\s|\sStatus\s{4}|\sSubject\s{54}|\sRequester\s{6}|\sCreated\son\s{21}$/)
-          expect(rows[5]).to eq("-" * 135)
-          expect(rows[6]).to include("|    26 |")
-          expect(rows.length).to be <= 56 # 6 rows for table headers + 25 tickets + 25 horizontal lines 
+          expect(rows[0]).to match(/Showing page 2/)
+          expect(rows[1]).to match(/Type 'menu' to view options or 'quit' to exit/)
+          expect(rows[2]).to eq("-" * 135)
+          expect(rows[3]).to match(/^\s{2}ID\s|\sStatus\s{4}|\sSubject\s{54}|\sRequester\s{6}|\sCreated\son\s{21}$/)
+          expect(rows[4]).to eq("-" * 135)
+          expect(rows[5]).to include("|    26 |")
+          expect(rows.length).to be <= 57 # 6->table headers + 25->tickets + 25->dividers + 1->option
         end
       end
     end
@@ -83,13 +83,13 @@ describe Viewer do
           fake_user_input("prev", "quit")
           output = capture_stdout { vcr_viewer.prev_page }
           rows = output.split("\n")
-          expect(rows[1]).to match(/Showing page 5/)
-          expect(rows[2]).to match(/Type 'menu' to view options or 'quit' to exit/)
-          expect(rows[3]).to eq("-" * 135)
-          expect(rows[4]).to match(/^\s{2}ID\s|\sStatus\s{4}|\sSubject\s{54}|\sRequester\s{6}|\sCreated\son\s{21}$/)
-          expect(rows[5]).to eq("-" * 135)
-          expect(rows[6]).to include("|   101 |")
-          expect(rows.length).to be <= 56 # 6 rows for table headers + 25 tickets + 25 horizontal lines
+          expect(rows[0]).to match(/Showing page 5/)
+          expect(rows[1]).to match(/Type 'menu' to view options or 'quit' to exit/)
+          expect(rows[2]).to eq("-" * 135)
+          expect(rows[3]).to match(/^\s{2}ID\s|\sStatus\s{4}|\sSubject\s{54}|\sRequester\s{6}|\sCreated\son\s{21}$/)
+          expect(rows[4]).to eq("-" * 135)
+          expect(rows[5]).to include("|   101 |")
+          expect(rows.length).to be <= 57 # 6->table headers + 25->tickets + 25->dividers + 1->option
         end
       end
     end
@@ -103,11 +103,11 @@ describe Viewer do
           fake_user_input("show 1", "quit")
           output = capture_stdout { vcr_viewer.show(1)}
           rows = output.split("\n")
-          expect(rows[1]).to match(/Showing ticket ID 1:/)
-          expect(rows[2]).to eq("-" * 135)
-          expect(rows[3]).to match(/^\s{2}ID\s|\sStatus\s{4}|\sSubject\s{54}|\sRequester\s{6}|\sCreated\son\s{21}$/)
-          expect(rows[4]).to eq("-" * 135)
-          expect(rows[5]).to include("|     1 |")
+          expect(rows[0]).to match(/Showing ticket ID 1/)
+          expect(rows[1]).to eq("-" * 135)
+          expect(rows[2]).to match(/^\s{2}ID\s|\sStatus\s{4}|\sSubject\s{54}|\sRequester\s{6}|\sCreated\son\s{21}$/)
+          expect(rows[3]).to eq("-" * 135)
+          expect(rows[4]).to include("|     1 |")
         end
       end
     end
