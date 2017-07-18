@@ -3,10 +3,12 @@ require "pry"
 require_relative "client"
 
 class Viewer
-  attr_accessor :client, :tickets
+  attr_accessor :client, :tickets, :page
   def initialize
     @client = Client.new
     @tickets = []
+    @page = 0
+    # @tickets_count = 0
   end
 
   def menu
@@ -22,19 +24,49 @@ class Viewer
     puts "Retrieving tickets..."
     @tickets = @client.all_tickets
     puts "Done."
+    if @tickets.empty?
+      puts "Failed to connect to the api. Type 'load' to try again."
+    else
+      output_options
+      output_table_header
+      @tickets[current_page].each do |ticket|
+        list(ticket)
+      end
+    end
     @tickets
   end
 
+  # def tickets_total
+  #   @tickets_count = @tickets.inject(0) { |len, ary| len + ary.length }
+  # end
+
+  def current_page
+    @page % @tickets.length
+  end
+
   def next_page
-    output_options
-    output_table_header
     if @tickets.empty?
       puts "Please type 'load' to retrieve the tickets"
     else
-      @tickets[@page].each do |ticket|
+      @page += 1
+      output_options
+      output_table_header
+      @tickets[current_page].each do |ticket|
         list(ticket)
       end
-      @page += 1
+    end
+  end
+
+  def prev_page
+    if @tickets.empty?
+      puts "Please type 'load' to retrieve the tickets"
+    else
+      @page -= 1
+      output_options
+      output_table_header
+      @tickets[current_page].each do |ticket|
+        list(ticket)
+      end
     end
   end
 
@@ -58,8 +90,9 @@ class Viewer
   end
 
   def output_options
-    puts "\nShowing page 1"
-    puts "Type 'menu' to view options or 'quit' to exit"
+    puts
+    puts "<<< Showing page #{current_page + 1} >>>".center(120)
+    puts "<<< Type 'menu' to view options or 'quit' to exit >>>".center(120)
   end
 
   def output_table_header
@@ -74,4 +107,20 @@ end
 
 # v = Viewer.new
 # v.load
+# v.prev_page
 # v.next_page
+# v.next_page
+# v.prev_page
+# v.prev_page
+# v.prev_page
+# v.prev_page
+# v.prev_page
+# v.prev_page
+# v.next_page
+# v.next_page
+# v.next_page
+# v.next_page
+# v.next_page
+# v.next_page
+# v.next_page
+
