@@ -13,11 +13,12 @@ describe Client do
         end
 
         it "records with correct ticket keys" do
-          expect(tickets.first.keys).to include("id", "requester_id", "subject", "description", "created_at")
+          expect(tickets[0][0].keys).to include("id", "requester_id", "subject", "description", "created_at")
         end
 
         it "records with correct ticket count" do
-          expect(tickets.length).to eq ticket_count
+          tickets_total = tickets.inject(0) { |len, t| len + t.length }
+          expect(tickets_total).to eq ticket_count
         end
       end
     end
