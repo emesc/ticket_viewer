@@ -67,12 +67,13 @@ class Viewer
   end
 
   def list(ticket)
-    item_line = "| " << ticket["id"].to_s.rjust(3)
+    item_line = "| " << ticket["id"].to_s.rjust(5)
+    item_line << " | " + ticket["status"].ljust(10)
     item_line << " | " + ticket["subject"].ljust(60)
     item_line << " | " + ticket["requester_id"].to_s.ljust(14)
     item_line << " | " + ticket["created_at"].to_s.ljust(30) + " |"
     puts item_line
-    puts "-" * 120
+    puts "-" * 135
   end
 
   def flatten_tickets
@@ -101,17 +102,18 @@ class Viewer
 
   def output_options
     puts
-    puts "<<< Showing page #{current_page + 1} >>>".center(120)
-    puts "<<< Type 'menu' to view options or 'quit' to exit >>>".center(120)
+    puts "<<< Showing page #{current_page + 1} >>>".center(135)
+    puts "<<< Type 'menu' to view options or 'quit' to exit >>>".center(135)
   end
 
   def output_table_header
-    puts "-" * 120
-    print "| " + "ID".rjust(3) + " |"
+    puts "-" * 135
+    print "| " + "ID".rjust(5) + " |"
+    print " " + "Status".ljust(10) + " |"
     print " " + "Subject".ljust(60) + " |"
     print " " + "Requester".ljust(14) + " |"
     print " " + "Created on".ljust(30) + " |\n"
-    puts "-" * 120
+    puts "-" * 135
   end
 end
 
