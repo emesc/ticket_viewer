@@ -9,10 +9,48 @@ class Viewer
     @tickets = []
     @tickets_flat = []
     @page = 0
+    # launch
   end
 
+  # def launch
+  #   introduction
+  #   result = ""
+  #   until result == :quit
+  #     command, args = get_command
+  #     result = do_command(command, args)
+  #   end
+  #   conclusion
+  # end
+
+  # def get_command
+  #   puts
+  #   print "> "
+  #   user_command = gets.chomp.downcase.strip
+  #   args = user_command.split(" ")
+  #   action = args.shift
+  #   return action, args
+  # end
+
+  # def do_command(action, args=[])
+  #   case action
+  #   when 'menu'
+  #     menu
+  #   when 'load'
+  #     load
+  #   when 'next'
+  #     next_page
+  #   when 'prev'
+  #     prev_page
+  #   when 'show'
+  #     id = args.shift
+  #     show(id)
+  #   when 'quit'
+  #     :quit
+  #   end
+  # end
+
   def menu
-    puts "Select view options"
+    puts "View options"
     puts "*Type 'load'      to connect to the api and retrieve the tickets"
     puts "*Type 'next'      to view the next page of tickets"
     puts "*Type 'prev'      to view the previous page of tickets"
@@ -23,15 +61,18 @@ class Viewer
   def load
     puts "Retrieving tickets..."
     @tickets = @client.all_tickets
-    puts "Done."
+    flatten_tickets if @tickets
+    puts "Done. Your request returned #{@tickets_flat.length} tickets on #{@tickets.length} pages.\n\n"
     if @tickets.empty?
       puts "Failed to connect to the api. Type 'load' to try again."
     else
+      @page = 0
       output_options
       output_table_header
       @tickets[current_page].each do |ticket|
         list(ticket)
       end
+      output_options
     end
     @tickets
   end
@@ -50,6 +91,7 @@ class Viewer
       @tickets[current_page].each do |ticket|
         list(ticket)
       end
+      output_options
     end
   end
 
@@ -63,6 +105,7 @@ class Viewer
       @tickets[current_page].each do |ticket|
         list(ticket)
       end
+      output_options
     end
   end
 
@@ -81,20 +124,23 @@ class Viewer
   end
 
   def show(id)
-    flatten_tickets # to move to launch
-    ticket = @tickets_flat.find { |t| t["id"] == id }
-    puts "\nShowing ticket ID #{ticket['id']}:"
-    output_table_header
-    list(ticket)
-    print "PRIORITY   : "
-    puts ticket['priority'].nil? ? "-" : "#{ticket['priority']}"
-    puts "DESCRIPTION: #{ticket['description']}"
+    if @tickets.empty?
+      puts "Please type 'load' to retrieve the tickets"
+    else
+      ticket = @tickets_flat.find { |t| t["id"] == id.to_i }
+      puts "<<< Showing ticket ID #{ticket['id']} >>>".center(135)
+      output_table_header
+      list(ticket)
+      print "PRIORITY   : "
+      puts ticket['priority'].nil? ? "-" : "#{ticket['priority']}"
+      puts "DESCRIPTION: #{ticket['description']}"
+      puts "<<< Type 'menu' to view options or 'quit' to exit >>>".center(135)
+    end
   end
 
   def introduction
     puts "\nWelcome to the ticket viewer"
     puts "Type 'menu' to view options or 'quit' to exit"
-    print "> "
   end
 
   def conclusion
@@ -102,7 +148,6 @@ class Viewer
   end
 
   def output_options
-    puts
     puts "<<< Showing page #{current_page + 1} >>>".center(135)
     puts "<<< Type 'menu' to view options or 'quit' to exit >>>".center(135)
   end
@@ -118,7 +163,7 @@ class Viewer
   end
 end
 
-# v = Viewer.new
+# Viewer.new
 # v.load
 # v.show(101)
 # v.show(75)
