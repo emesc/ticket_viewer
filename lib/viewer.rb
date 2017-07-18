@@ -3,37 +3,38 @@ require "pry"
 require_relative "client"
 
 class Viewer
-  attr_accessor :client
+  attr_accessor :client, :tickets
   def initialize
     @client = Client.new
-  end
-
-  def connect
-    introduction
-    # menu
-    next_page
-    conclusion
+    @tickets = []
   end
 
   def menu
     puts "Select view options"
+    puts "*Type 'load'      to connect to the api and retrieve the tickets"
     puts "*Type 'next'      to view the next page of tickets"
     puts "*Type 'prev'      to view the previous page of tickets"
     puts "*Type 'show <id>' to view a ticket"
     puts "*Type 'quit'      to exit"
   end
 
-  def all_tickets
-    @client.all_tickets
+  def load
+    puts "Retrieving tickets..."
+    @tickets = @client.all_tickets
+    puts "Done."
+    @tickets
   end
 
   def next_page
     output_options
     output_table_header
-    tickets = all_tickets
-    # binding.pry
-    tickets.each do |ticket|
-      list(ticket)
+    if @tickets.empty?
+      puts "Please type 'load' to retrieve the tickets"
+    else
+      @tickets[@page].each do |ticket|
+        list(ticket)
+      end
+      @page += 1
     end
   end
 
@@ -72,4 +73,5 @@ class Viewer
 end
 
 # v = Viewer.new
+# v.load
 # v.next_page
