@@ -7,8 +7,8 @@ class Viewer
   def initialize
     @client = Client.new
     @tickets = []
+    @tickets_flat = []
     @page = 0
-    # @tickets_count = 0
   end
 
   def menu
@@ -35,10 +35,6 @@ class Viewer
     end
     @tickets
   end
-
-  # def tickets_total
-  #   @tickets_count = @tickets.inject(0) { |len, ary| len + ary.length }
-  # end
 
   def current_page
     @page % @tickets.length
@@ -79,6 +75,20 @@ class Viewer
     puts "-" * 120
   end
 
+  def flatten_tickets
+    @tickets_flat = @tickets.flatten
+  end
+
+  def show(id)
+    flatten_tickets # to move to launch
+    ticket = @tickets_flat.find { |t| t["id"] == id }
+    puts "Showing ticket ID #{ticket['id']}:"
+    output_table_header
+    list(ticket)
+    puts "Priority   : #{ticket['priority']} "
+    puts "Description: #{ticket['description']}"
+  end
+
   def introduction
     puts "\nWelcome to the ticket viewer"
     puts "Type 'menu' to view options or 'quit' to exit"
@@ -107,6 +117,7 @@ end
 
 # v = Viewer.new
 # v.load
+# v.show(101)
 # v.prev_page
 # v.next_page
 # v.next_page
