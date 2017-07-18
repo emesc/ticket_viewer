@@ -94,6 +94,24 @@ describe Viewer do
       end
     end
 
+    context "with show command" do
+      VCR.use_cassette("tickets") do
+        vcr_viewer = Viewer.new
+        vcr_viewer.load
+
+        it "outputs a ticket with the requested id" do
+          fake_user_input("show 1", "quit")
+          output = capture_stdout { vcr_viewer.show(1)}
+          rows = output.split("\n")
+          expect(rows[0]).to match(/Showing ticket ID 1:/)
+          expect(rows[1]).to eq("-" * 120)
+          expect(rows[2]).to match(/^\s{2}ID\s|\sSubject\s{54}|\sRequester\s{6}|\sCreated\son\s{21}$/)
+          expect(rows[3]).to eq("-" * 120)
+          expect(rows[4]).to include("|   1 |")
+        end
+      end
+    end
+
     context "with quit command" do
       it "outputs a closing message and exits" do
         fake_user_input("quit")
