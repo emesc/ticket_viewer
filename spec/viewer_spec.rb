@@ -94,6 +94,26 @@ describe Viewer do
       end
     end
 
+    context "with page command" do
+      VCR.use_cassette("tickets") do
+        vcr_viewer = Viewer.new
+        vcr_viewer.load
+
+        it "outputs a user specified page" do
+          fake_user_input("page 3", "quit")
+          output = capture_stdout { vcr_viewer.page(3) }
+          rows = output.split("\n")
+          expect(rows[0]).to match(/Showing page 3/)
+          expect(rows[1]).to match(/Type 'menu' to view options or 'quit' to exit/)
+          expect(rows[2]).to eq("-" * 135)
+          expect(rows[3]).to match(/^\s{2}ID\s|\sStatus\s{4}|\sSubject\s{54}|\sRequester\s{6}|\sCreated\son\s{21}$/)
+          expect(rows[4]).to eq("-" * 135)
+          expect(rows[5]).to include("|    51 |")
+          expect(rows.length).to be <= 57 # 6->table headers + 25->tickets + 25->dividers + 1->option
+        end
+      end
+    end
+
     context "with show command" do
       VCR.use_cassette("tickets") do
         vcr_viewer = Viewer.new
