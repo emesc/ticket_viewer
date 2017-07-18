@@ -83,11 +83,12 @@ class Viewer
   def show(id)
     flatten_tickets # to move to launch
     ticket = @tickets_flat.find { |t| t["id"] == id }
-    puts "Showing ticket ID #{ticket['id']}:"
+    puts "\nShowing ticket ID #{ticket['id']}:"
     output_table_header
     list(ticket)
-    puts "Priority   : #{ticket['priority']} "
-    puts "Description: #{ticket['description']}"
+    print "PRIORITY   : "
+    puts ticket['priority'].nil? ? "-" : "#{ticket['priority']}"
+    puts "DESCRIPTION: #{ticket['description']}"
   end
 
   def introduction
@@ -120,6 +121,8 @@ end
 # v = Viewer.new
 # v.load
 # v.show(101)
+# v.show(75)
+# v.show(1)
 # v.prev_page
 # v.next_page
 # v.next_page
