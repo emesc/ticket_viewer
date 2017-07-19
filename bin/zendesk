@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+Dir[File.expand_path("./lib/**/*.rb")].each { |f| require f }
+
+viewer = Viewer.new
+viewer.launch

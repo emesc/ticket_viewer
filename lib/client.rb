@@ -24,7 +24,7 @@ class Client
   end
 
   def all_tickets
-    paginate_through("tickets.json").flatten
+    paginate_through("tickets.json")
   end
 
   private
