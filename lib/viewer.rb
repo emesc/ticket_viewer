@@ -139,7 +139,7 @@ class Viewer
     item_line << " | " + ticket["status"].ljust(10)
     item_line << " | " + ticket["subject"].ljust(60)
     item_line << " | " + ticket["requester_id"].to_s.ljust(14)
-    item_line << " | " + format_time(ticket["created_at"]).ljust(30) + " |"
+    item_line << " | " + datetime_format(ticket["created_at"]).ljust(30) + " |"
     puts item_line
     puts "-" * 135
   end
@@ -189,8 +189,10 @@ class Viewer
     puts "-" * 135
   end
 
-  def format_time(created_at)
-    DateTime.parse(created_at).strftime("%d %b %Y %H:%M:%S")
+  def datetime_format(created_at)
+    dt = DateTime.parse(created_at)
+    local_dt = dt.new_offset(DateTime.now.offset)
+    local_dt.strftime("%Y %b %d at %H:%M:%S")
   end
 
   def user_input(prompt="")
