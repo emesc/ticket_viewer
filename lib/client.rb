@@ -29,15 +29,15 @@ class Client
 
   private
     def subdomain
-      ENV.fetch("ZENDESK_SUBDOMAIN")
+      "emesc"
     end
 
     def email
-      ENV.fetch("ZENDESK_EMAIL")
+      "em@curlycoder.me"
     end
 
     def password
-      ENV.fetch("ZENDESK_PASSWORD")
+      "mPuHma8XKa6bJvzw"
     end
 
     def zendesk_url(filename, params={})
