@@ -22,6 +22,7 @@ describe Viewer do
       VCR.use_cassette("tickets") do
         vcr_viewer = Viewer.new
         tickets = vcr_viewer.load
+        tickets_flat = tickets.flatten
 
         it "returns api response with the correct objects" do
           expect(tickets).to       be_an_instance_of Array
@@ -95,6 +96,15 @@ describe Viewer do
           expect(rows[5]).to include("|    51 |")
           expect(rows.length).to be <= 57 # 6->table headers + 25->tickets + 25->dividers + 1->option
         end
+
+        it "does not output a table for requests outside the number of pages returned" do
+          [-1, 0, 6].each do |i|
+            output = capture_stdout { vcr_viewer.page(i) }
+            rows = output.split("\n")
+            expect(rows[0]).to match(/Please enter page number between/)
+            expect(rows.length).to be == 1
+          end
+        end
       end
     end
 
@@ -111,6 +121,15 @@ describe Viewer do
           expect(rows[2]).to match(/^\s{2}ID\s|\sStatus\s{4}|\sSubject\s{54}|\sRequester\s{6}|\sCreated\son\s{21}$/)
           expect(rows[3]).to eq("-" * 135)
           expect(rows[4]).to include("|     1 |")
+        end
+
+        it "does not output a table for requests outside the number of tickets returned" do
+          [-1, 0, 102].each do |i|
+            output = capture_stdout { vcr_viewer.show(i) }
+            rows = output.split("\n")
+            expect(rows[0]).to match(/Ticket not found/)
+            expect(rows.length).to be == 1
+          end
         end
       end
     end
