@@ -70,32 +70,36 @@ class Viewer
   def load
     puts "Retrieving tickets..."
     @tickets = @client.all_tickets
-    flatten_tickets if valid?(@tickets)
+    flatten_tickets if !invalid?(@tickets)
     puts "Done. Your request returned #{@tickets_flat.length} tickets on #{@tickets.length} pages.\n\n"
-    valid?(@tickets) ? paginate("load") : reconnect_reminder
+    invalid?(@tickets) ? reconnect_reminder : paginate("load")
     @tickets
   end
 
   def next_page
-    valid?(@tickets) ? paginate("next") : load_reminder
+    invalid?(@tickets) ? load_reminder : paginate("next")
   end
 
   def prev_page
-    valid?(@tickets) ? paginate("prev") : load_reminder
+    invalid?(@tickets) ? load_reminder : paginate("prev")
   end
 
   def page(num)
-    if valid?(@tickets)
-      paginate("page", num: num)
+    if invalid?(@tickets)
+      load_reminder
     elsif !(1..@tickets.length).include? num
       puts "Please enter page number between 1 and #{@tickets.length}"
     else
-      load_reminder
+      paginate("page", num: num)
     end
   end
 
   def show(id)
-    if valid?(@tickets)
+    if invalid?(@tickets)
+      load_reminder
+    elsif !(1..@tickets_flat.length).include? id
+      puts "Ticket not found"
+    else
       ticket = @tickets_flat.find { |t| t["id"] == id }
       puts "<<< Showing ticket ID #{ticket['id']} >>>".center(135)
       output_table_header
@@ -104,15 +108,11 @@ class Viewer
       puts ticket['priority'].nil? ? "-" : "#{ticket['priority']}"
       puts "DESCRIPTION: #{ticket['description']}"
       puts "<<< Type 'menu' to view options or 'quit' to exit >>>".center(135)
-    elsif !(1..@tickets_flat.length).include? id
-      puts "Ticket not found"
-    else
-      load_reminder
     end
   end
 
-  def valid?(tickets)
-    !(tickets.empty? || @tickets.all?(&:nil?)) ? true : false
+  def invalid?(tickets)
+    (tickets.empty? || @tickets.all?(&:nil?)) ? true : false
   end
 
   def load_reminder
