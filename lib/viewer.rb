@@ -1,16 +1,20 @@
 require "readline"
 require "pry"
+
 require_relative "client"
+require_relative "ticket"
 
 class Viewer
   attr_accessor :client, :tickets, :page
+  attr_reader :ticket
 
   COMMANDS = ["menu", "load", "next", "prev", "page", "show", "quit"]
 
   def initialize
     @client = Client.new
+    @ticket = Ticket.new
     @tickets = []
-    @tickets_flat = []
+    @tickets_flat
     @page = 0
   end
 
@@ -38,23 +42,70 @@ class Viewer
 
   def do_command(command, args=[])
     case command
+    when 'quit'
+      :quit
     when 'menu'
       menu
     when 'load'
       load
-    when 'next'
-      next_page
-    when 'prev'
-      prev_page
     when 'page'
-      num = args.shift
-      page(num.to_i)
+      num = args.shift.to_i
+      @ticket.page(@tickets, num) if valid_page?(num)
     when 'show'
-      id = args.shift
-      show(id.to_i)
-    when 'quit'
-      :quit
+      id = args.shift.to_i
+      @ticket.show(@tickets_flat, id) if valid_ticket_id?(id)
+    else
+      invalid?(@tickets) ? load_reminder : Ticket.send(command, @tickets)
     end
+  end
+
+  def valid_page?(num)
+    if invalid?(@tickets)
+      load_reminder
+      return false
+    elsif !(1..@tickets.length).include? num
+      puts "Please enter page number between 1 and #{@tickets.length}"
+      return false
+    else
+      return true
+    end
+  end
+
+  def valid_ticket_id?(id)
+    if invalid?(@tickets)
+      load_reminder
+      return false
+    elsif !(1..@tickets_flat.length).include? id
+      puts "Ticket not found"
+      return false
+    else
+      return true
+    end
+  end
+
+  def load
+    puts "Retrieving tickets..."
+    @tickets = @client.all_tickets
+    flatten_tickets if !invalid?(@tickets)
+    puts "Done. Your request returned #{@tickets_flat.length} tickets on #{@tickets.length} pages.\n\n"
+    invalid?(@tickets) ? reconnect_reminder : @ticket.first_page(@tickets)
+    @tickets
+  end
+
+  def invalid?(tickets)
+    (tickets.empty? || @tickets.all?(&:nil?)) ? true : false
+  end
+
+  def flatten_tickets
+    @tickets_flat = @tickets.flatten
+  end
+
+  def load_reminder
+    puts "Please type 'load' to retrieve the tickets"
+  end
+
+  def reconnect_reminder
+    puts "Failed to connect to the api. Type 'load' to try again."
   end
 
   def menu
@@ -67,103 +118,6 @@ class Viewer
     puts "*Type 'quit'      to exit"
   end
 
-  def load
-    puts "Retrieving tickets..."
-    @tickets = @client.all_tickets
-    flatten_tickets if !invalid?(@tickets)
-    puts "Done. Your request returned #{@tickets_flat.length} tickets on #{@tickets.length} pages.\n\n"
-    invalid?(@tickets) ? reconnect_reminder : paginate("load")
-    @tickets
-  end
-
-  def next_page
-    invalid?(@tickets) ? load_reminder : paginate("next")
-  end
-
-  def prev_page
-    invalid?(@tickets) ? load_reminder : paginate("prev")
-  end
-
-  def page(num)
-    if invalid?(@tickets)
-      load_reminder
-    elsif !(1..@tickets.length).include? num
-      puts "Please enter page number between 1 and #{@tickets.length}"
-    else
-      paginate("page", num: num)
-    end
-  end
-
-  def show(id)
-    if invalid?(@tickets)
-      load_reminder
-    elsif !(1..@tickets_flat.length).include? id
-      puts "Ticket not found"
-    else
-      ticket = @tickets_flat.find { |t| t["id"] == id }
-      puts "<<< Showing ticket ID #{ticket['id']} >>>".center(135)
-      output_table_header
-      list(ticket)
-      print "PRIORITY   : "
-      puts ticket['priority'].nil? ? "-" : "#{ticket['priority']}"
-      puts "DESCRIPTION: #{ticket['description']}"
-      puts "<<< Type 'menu' to view options or 'quit' to exit >>>".center(135)
-    end
-  end
-
-  def invalid?(tickets)
-    (tickets.empty? || @tickets.all?(&:nil?)) ? true : false
-  end
-
-  def load_reminder
-    puts "Please type 'load' to retrieve the tickets"
-  end
-
-  def reconnect_reminder
-    puts "Failed to connect to the api. Type 'load' to try again."
-  end
-
-  def paginate(option, args={})
-    case option
-    when "next"
-      @page += 1
-    when "prev"
-      @page -= 1
-    when "load"
-      @page = 0
-    when "page"
-      @page = args[:num] - 1
-    end 
-    render_tickets 
-  end
-
-  def render_tickets
-    output_options
-    output_table_header
-    @tickets[current_page].each do |ticket|
-      list(ticket)
-    end
-    output_options
-  end
-
-  def current_page
-  @page % @tickets.length
-  end
-
-  def list(ticket)
-    item_line = "| " << ticket["id"].to_s.rjust(5)
-    item_line << " | " + ticket["status"].ljust(10)
-    item_line << " | " + ticket["subject"].ljust(60)
-    item_line << " | " + ticket["requester_id"].to_s.ljust(14)
-    item_line << " | " + datetime_format(ticket["created_at"]).ljust(30) + " |"
-    puts item_line
-    puts "-" * 135
-  end
-
-  def flatten_tickets
-    @tickets_flat = @tickets.flatten
-  end
-
   def introduction
     puts "<<< Welcome to the ticket viewer >>>".center(135)
     puts "<<< Type 'menu' to view options or 'quit' to exit >>>".center(135)
@@ -171,27 +125,6 @@ class Viewer
 
   def conclusion
     puts "<<< Thank you for using the viewer. Goodbye >>>".center(135)
-  end
-
-  def output_options
-    puts "<<< Showing page #{current_page + 1} of #{@tickets.length} >>>".center(135)
-    puts "<<< Type 'menu' to view options or 'quit' to exit >>>".center(135)
-  end
-
-  def output_table_header
-    puts "-" * 135
-    print "| " + "ID".rjust(5) + " |"
-    print " " + "Status".ljust(10) + " |"
-    print " " + "Subject".ljust(60) + " |"
-    print " " + "Requester".ljust(14) + " |"
-    print " " + "Created on".ljust(30) + " |\n"
-    puts "-" * 135
-  end
-
-  def datetime_format(created_at)
-    dt = DateTime.parse(created_at)
-    local_dt = dt.new_offset(DateTime.now.offset)
-    local_dt.strftime("%Y %b %d at %H:%M:%S")
   end
 
   def user_input(prompt="")
