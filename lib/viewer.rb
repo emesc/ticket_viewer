@@ -70,68 +70,84 @@ class Viewer
   def load
     puts "Retrieving tickets..."
     @tickets = @client.all_tickets
-    flatten_tickets if @tickets
+    flatten_tickets if valid?(@tickets)
     puts "Done. Your request returned #{@tickets_flat.length} tickets on #{@tickets.length} pages.\n\n"
-    if @tickets.empty?
-      puts "Failed to connect to the api. Type 'load' to try again."
-    else
-      @page = 0
-      output_options
-      output_table_header
-      @tickets[current_page].each do |ticket|
-        list(ticket)
-      end
-      output_options
-    end
+    valid?(@tickets) ? paginate("load") : reconnect_reminder
     @tickets
   end
 
-  def current_page
-    @page % @tickets.length
-  end
-
   def next_page
-    if @tickets.empty?
-      puts "Please type 'load' to retrieve the tickets"
-    else
-      @page += 1
-      output_options
-      output_table_header
-      @tickets[current_page].each do |ticket|
-        list(ticket)
-      end
-      output_options
-    end
+    valid?(@tickets) ? paginate("next") : load_reminder
   end
 
   def prev_page
-    if @tickets.empty?
-      puts "Please type 'load' to retrieve the tickets"
-    else
-      @page -= 1
-      output_options
-      output_table_header
-      @tickets[current_page].each do |ticket|
-        list(ticket)
-      end
-      output_options
-    end
+    valid?(@tickets) ? paginate("prev") : load_reminder
   end
 
   def page(num)
-    if @tickets.empty?
-      puts "Please type 'load' to retrieve the tickets"
+    if valid?(@tickets)
+      paginate("page", num: num)
     elsif !(1..@tickets.length).include? num
       puts "Please enter page number between 1 and #{@tickets.length}"
     else
-      @page = num - 1
-      output_options
-      output_table_header
-      @tickets[current_page].each do |ticket|
-        list(ticket)
-      end
-      output_options
+      load_reminder
     end
+  end
+
+  def show(id)
+    if valid?(@tickets)
+      ticket = @tickets_flat.find { |t| t["id"] == id }
+      puts "<<< Showing ticket ID #{ticket['id']} >>>".center(135)
+      output_table_header
+      list(ticket)
+      print "PRIORITY   : "
+      puts ticket['priority'].nil? ? "-" : "#{ticket['priority']}"
+      puts "DESCRIPTION: #{ticket['description']}"
+      puts "<<< Type 'menu' to view options or 'quit' to exit >>>".center(135)
+    elsif !(1..@tickets_flat.length).include? id
+      puts "Ticket not found"
+    else
+      load_reminder
+    end
+  end
+
+  def valid?(tickets)
+    !(tickets.empty? || @tickets.all?(&:nil?)) ? true : false
+  end
+
+  def load_reminder
+    puts "Please type 'load' to retrieve the tickets"
+  end
+
+  def reconnect_reminder
+    puts "Failed to connect to the api. Type 'load' to try again."
+  end
+
+  def paginate(option, args={})
+    case option
+    when "next"
+      @page += 1
+    when "prev"
+      @page -= 1
+    when "load"
+      @page = 0
+    when "page"
+      @page = args[:num] - 1
+    end 
+    render_tickets 
+  end
+
+  def render_tickets
+    output_options
+    output_table_header
+    @tickets[current_page].each do |ticket|
+      list(ticket)
+    end
+    output_options
+  end
+
+  def current_page
+  @page % @tickets.length
   end
 
   def list(ticket)
@@ -146,23 +162,6 @@ class Viewer
 
   def flatten_tickets
     @tickets_flat = @tickets.flatten
-  end
-
-  def show(id)
-    if @tickets.empty?
-      puts "Please type 'load' to retrieve the tickets"
-    elsif !(1..@tickets_flat.length).include? id
-      puts "Ticket not found"
-    else
-      ticket = @tickets_flat.find { |t| t["id"] == id }
-      puts "<<< Showing ticket ID #{ticket['id']} >>>".center(135)
-      output_table_header
-      list(ticket)
-      print "PRIORITY   : "
-      puts ticket['priority'].nil? ? "-" : "#{ticket['priority']}"
-      puts "DESCRIPTION: #{ticket['description']}"
-      puts "<<< Type 'menu' to view options or 'quit' to exit >>>".center(135)
-    end
   end
 
   def introduction
