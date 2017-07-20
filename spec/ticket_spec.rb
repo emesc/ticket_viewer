@@ -1,9 +1,12 @@
-require "controller"
+require "ticket"
+require "viewer"
 
-describe Controller do
+describe Ticket do
   context "with tickets from load command" do
     VCR.use_cassette("tickets") do
       vcr_viewer = Viewer.new
+
+      # vcr_ticket = Ticket.new
       tickets = vcr_viewer.load
       tickets_flat = tickets.flatten
 
@@ -28,10 +31,11 @@ describe Controller do
   context "with next command" do
     VCR.use_cassette("tickets") do
       vcr_viewer = Viewer.new
-      vcr_viewer.load
+      tickets = vcr_viewer.load
+      vcr_ticket = Ticket.new
 
       it "outputs the next page of tickets" do
-        output = capture_stdout { vcr_viewer.next_page }
+        output = capture_stdout { vcr_ticket.next_page }
         rows = output.split("\n")
         expect(rows[0]).to match(/Showing page 2/)
         expect(rows[1]).to match(/Type 'menu' to view options or 'quit' to exit/)
@@ -47,10 +51,11 @@ describe Controller do
   context "with prev command" do
     VCR.use_cassette("tickets") do
       vcr_viewer = Viewer.new
-      vcr_viewer.load
+      tickets = vcr_viewer.load
+      vcr_ticket = Ticket.new
 
       it "outputs the previous page of tickets" do
-        output = capture_stdout { vcr_viewer.prev_page }
+        output = capture_stdout { vcr_ticket.prev_page }
         rows = output.split("\n")
         expect(rows[0]).to match(/Showing page 5/)
         expect(rows[1]).to match(/Type 'menu' to view options or 'quit' to exit/)
@@ -66,10 +71,11 @@ describe Controller do
   context "with page command" do
     VCR.use_cassette("tickets") do
       vcr_viewer = Viewer.new
-      vcr_viewer.load
+      tickets = vcr_viewer.load
+      vcr_ticket = Ticket.new
 
       it "outputs a user specified page" do
-        output = capture_stdout { vcr_viewer.page(3) }
+        output = capture_stdout { vcr_ticket.page(3) }
         rows = output.split("\n")
         expect(rows[0]).to match(/Showing page 3/)
         expect(rows[1]).to match(/Type 'menu' to view options or 'quit' to exit/)
@@ -82,7 +88,7 @@ describe Controller do
 
       it "does not output a table for requests outside the number of pages returned" do
         [-1, 0, 6].each do |i|
-          output = capture_stdout { vcr_viewer.page(i) }
+          output = capture_stdout { vcr_ticket.page(i) }
           rows = output.split("\n")
           expect(rows[0]).to match(/Please enter page number between/)
           expect(rows.length).to be == 1
@@ -94,10 +100,11 @@ describe Controller do
   context "with show command" do
     VCR.use_cassette("tickets") do
       vcr_viewer = Viewer.new
-      vcr_viewer.load
+      tickets = vcr_viewer.load
+      vcr_ticket = Ticket.new
 
       it "outputs a ticket with the requested id" do
-        output = capture_stdout { vcr_viewer.show(1)}
+        output = capture_stdout { vcr_ticket.show(1)}
         rows = output.split("\n")
         expect(rows[0]).to match(/Showing ticket ID 1/)
         expect(rows[1]).to eq("-" * 135)
@@ -108,7 +115,7 @@ describe Controller do
 
       it "does not output a table for requests outside the number of tickets returned" do
         [-1, 0, 102].each do |i|
-          output = capture_stdout { vcr_viewer.show(i) }
+          output = capture_stdout { vcr_ticket.show(i) }
           rows = output.split("\n")
           expect(rows[0]).to match(/Ticket not found/)
           expect(rows.length).to be == 1
