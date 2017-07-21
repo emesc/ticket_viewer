@@ -2,5 +2,28 @@
 
 Dir[File.expand_path("./lib/**/*.rb")].each { |f| require f }
 
+ACTIONS = ["menu", "load", "next", "prev", "page", "show", "quit"]
 viewer = Viewer.new
-viewer.launch
+
+puts "\n" + "<<< Welcome to the ticket viewer >>>".center(135)
+viewer.load
+
+loop do
+  print "> "
+  args = gets.chomp.downcase.split
+  action = args.shift
+  # arg = args.shift.to_i
+
+  if action == "quit"
+    break
+  elsif action == "page" || action == "show"
+    viewer.send(action, args.shift.to_i)
+  elsif ACTIONS.include? action
+    viewer.send action
+  else
+    puts "I didn't get it. Please type 'menu' for valid commands." 
+  end
+  puts
+end
+
+puts "\n" + "<<< Thank you for using the viewer. Goodbye >>>".center(135)
