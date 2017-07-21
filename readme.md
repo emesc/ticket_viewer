@@ -5,18 +5,24 @@
 - Ruby 2.3.1
 - OS Sierra 10.12.5
 
+## Install the needed gems using bundle
+
+```
+  $ bundle install
+```
+
 ## Run the tests
 
 For individual test file:
 
 ```
-  $ rspec spec/client_spec.rb
+  $ bundle exec rspec spec/client_spec.rb
 ```
 
 To run all the tests:
 
 ```
-  $ rspec
+  $ bundle exec rspec
 ```
 
 ## How to use
