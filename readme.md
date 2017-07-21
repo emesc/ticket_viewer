@@ -1,6 +1,6 @@
 # Zendesk Ticket Viewer
 
-## Tools used
+## Created and tested using
 
 - Ruby 2.3.1
 - OS Sierra 10.12.5
